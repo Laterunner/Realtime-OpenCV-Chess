@@ -25,11 +25,13 @@ boxes = np.zeros((8,8,4),dtype=int)    # contains top-left and bottom-right poin
 fen_line = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' # fen line of chess board
 board = chess.Board(fen=fen_line) # object of chess board
 dir_path = os.path.dirname(os.path.realpath(__file__))+"/numpy_saved" # path of current directory
-
-# device = cv2.VideoCapture(1) # set devidce for read image (1: for tacking input from usb-webcam)
+c_width =1920
+c_height=1080
+dev0 = 'v4l2src device=/dev/video0 ! video/x-raw,width='+str(c_width)+',height='+str(c_height)+', framerate =5/1 , color=BGRX ! videoconvert! appsink'
+cam = cv2.VideoCapture(dev0)
 img_resize = (800,800) # set o/p image size
 image = []
-engine = chess.engine.SimpleEngine.popen_uci("stockfish-10-win\Windows\stockfish_10_x64.exe") # stockfish engine
+engine = chess.engine.SimpleEngine.popen_uci("/home/marius/Desktop/pyprojects/engine_dir/sf12nnue/stockfish")  # SF12NNUE
 chess_board = []   # it will store chess board matrix
 player_bool_position =[]
 bool_position = np.zeros((8,8),dtype=int)
@@ -266,17 +268,17 @@ def set_legal_positions(game_image,board,boxes):
     
 
 ###################################################################################
-## camara position calibration
+## camera position calibration
 ###################################################################################
 
 while True:
-    print("Do you want to set camara Position[y/n] : ",end=" ")
+    print("Do you want to set camera Position[y/n] : ",end=" ")
     answer = str(input())
     if answer == "y" or answer == "Y":
         print("Press q for exit : ")
         while True:
             ## show frame from camera and set positon by moving camera
-            flag , img = cv2.VideoCapture('http://192.168.43.1:4812/video').read()
+            flag , img = cam.read()
             img = cv2.resize(img,img_resize)
             if flag:
                 cv2.imshow("Set camera position",img)
@@ -300,7 +302,7 @@ while True:
 while True:
     print("DO you want to warp prespective image[y/n] :",end=" ")
     answer = str(input())
-    ret , img = cv2.VideoCapture('http://192.168.43.1:4812/video').read()
+    ret , img = cam.read()
     img =   cv2.resize(img,(800,800))
     width,height = 800,800
     if answer == "y" or answer == "Y":
@@ -333,14 +335,15 @@ while True:
         print("do you want to calibrate new Points for corners [y/n]:",end=" ")
         ans = str(input())
         if ans == "y" or ans == "Y":
-            ret , img = cv2.VideoCapture('http://192.168.43.1:4812/video').read()
+            ret , img = cam.read()
             img =   cv2.resize(img,(800,800))
             img = get_warp_img(img,dir_path,img_resize)
             points = []
             for i in range(9):
                 pt = get_points(img,9)
                 points.append(pt)
-            np.savez(dir_path+"/chess_board_points.npz",points=points)
+                print(points)
+                np.savez(dir_path+"/chess_board_points.npz",points=points)
             break
         elif ans == "n" or ans == "N":
             # do some work
@@ -371,7 +374,7 @@ while True:
     ans = str(input())
     if ans == 'y' or ans == "Y":
         # show boxes
-        ret , img = cv2.VideoCapture('http://192.168.43.1:4812/video').read()
+        ret , img = cam.read()
         img =   cv2.resize(img,(800,800))
         img = get_warp_img(img,dir_path,img_resize)
         img_box = img.copy()
@@ -410,7 +413,7 @@ while True:
             else:
                 board.turn = False
 
-            ret,img = cv2.VideoCapture('http://192.168.43.1:4812/video').read()
+            ret,img = cam.read()
             img = cv2.resize(img,(800,800))
             img = get_warp_img(img,dir_path,img_resize)
             img_box = img.copy()
@@ -444,7 +447,7 @@ while 1:
 
     ## white turn 
     if board.turn and board.is_checkmate() == False:
-        ret , img = cv2.VideoCapture('http://192.168.43.1:4812/video').read()
+        ret , img = cam.read()
         img =   cv2.resize(img,(800,800))
         img = get_warp_img(img,dir_path,img_resize)
         chess_board,player_bool_position = fen2board(board.fen())
@@ -483,7 +486,7 @@ while 1:
     if board.turn == False and board.is_checkmate() == False:
         chess_board,bool_position = fen2board(board.fen())
 
-        ret , img_1 = cv2.VideoCapture('http://192.168.43.1:4812/video').read()
+        ret , img_1 = cam.read()
         img_1 =   cv2.resize(img_1,(800,800))
         img_1 = get_warp_img(img_1,dir_path,img_resize)
         # cv2.imshow("Img_1 : ",img_1)
@@ -495,7 +498,7 @@ while 1:
             if cv2.waitKey(1) == ord('q'):
                 break
 
-        ret , img_2 = cv2.VideoCapture('http://192.168.43.1:4812/video').read()
+        ret , img_2 = cam.read()
         img_2 =   cv2.resize(img_2,(800,800))
         img_2 = get_warp_img(img_2,dir_path,img_resize)
         # cv2.imshow("Img_2 : ",img_2)
@@ -518,7 +521,7 @@ while 1:
 
     if board.is_checkmate():
         print("Game Over")
-        ret , img = cv2.VideoCapture('http://192.168.43.1:4812/video').read()
+        ret , img = cam.read()
         img_1 =   cv2.resize(img,(800,800))
         game_img = get_warp_img(img_1,dir_path,img_resize)
         show_game(game_img,board,last_move)
