@@ -6,7 +6,8 @@ import chess
 import chess.engine
 import cv2
 import numpy as np
-
+import sys
+import subprocess
 
 ###################################################################################
 ## Import files
@@ -442,7 +443,26 @@ while True:
 ###################################################################################
 ## Start Game
 ###################################################################################
+subprocess.call(["clear"])
+print("message: start game")
 
+'''
+print("FEN:", fen_line)
+print(board)
+print("map_position a3: ", map_position["a3"], "\n")
+
+print(map_function_for_number_2_position()) # wird nie benutzt
+
+current_player_bool_positition=[]
+fen2board(fen_line)
+print("chess_board: \n",chess_board, "\n")
+print("current_player_bool_position: \n", current_player_bool_positition, "\n")
+
+fen2board_2(fen_line)
+print("chess_board:\n", chess_board)
+fen2board(fen_line)
+print(black_player_bool_position)
+'''
 while 1:
 
     ## white turn 
