@@ -15,8 +15,8 @@ def thresold_calibreation(img):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return t
 
-image1 = cv2.imread('Method_working\Images/2.jpg')
-image2 = cv2.imread('Method_working\Images/3.jpg')
+image1 = cv2.imread('Method_working/Images/2.jpg')
+image2 = cv2.imread('Method_working/Images/3.jpg')
 
 image1_gray = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
 image2_gray = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
